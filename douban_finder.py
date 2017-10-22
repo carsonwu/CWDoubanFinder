@@ -16,9 +16,9 @@ def get_posts_from_groups(groups, user_id):
     all_posts = []
     group_index = 1
     for group in groups:
-        count = 50
+        count = 100  # how many records per request (100 is the max limited by Douban)
         start = 0
-        print '================ NOW SEARCH %d GROUP ================' % group_index
+        print '================ NOW SEARCH GROUP %d ================' % group_index
         group_index += 1
         while start < 1000:
             url = DOUBAN_API_DOMAIN + 'group/' + group + \
@@ -33,11 +33,13 @@ def get_posts_from_groups(groups, user_id):
                     if author_id == user_id:
                         all_posts.append(post_dict['alt'])
                 start += count
-                sleep(10)
+                sleep(1)
             except:
+                print 'Exception occur'
                 break
     for post_url in all_posts:
         print 'Post url: %s' % post_url
+    return all_posts
 
 
 def get_groups_of_user(user_id):
@@ -51,12 +53,21 @@ def get_groups_of_user(user_id):
         group_name = title_box.a.get('href').split('/group/')[-1][:-1]
         # print group_name
         group_name_list.append(group_name)
-    print 'This user joined %d groups' %len(group_name_list)
+    print 'This user joined %d groups' % len(group_name_list)
     return group_name_list
+
+
+def save_result_to_file(post_list):
+    print 'Saving %d records to output.txt' % len(post_list)
+    with open("output.txt", "w") as outfile:
+        json.dump(post_list, outfile)
 
 
 def get_posts_of_user(user_id):
     groups_the_user_joined = get_groups_of_user(user_id)
-    get_posts_from_groups(groups_the_user_joined, user_id)
+    posts = get_posts_from_groups(groups_the_user_joined, user_id)
+    return posts
 
-get_posts_of_user('146514079')
+
+all_post = get_posts_of_user('112038936')
+save_result_to_file(all_post)
