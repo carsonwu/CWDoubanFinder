@@ -57,19 +57,23 @@ def scrape_posts_from_groups(groups, user_id):
             # https://www.douban.com/group/kaopulove/discussion?start=0
             url = DOUBAN_DOMAIN + 'group/' + group + \
                 '/discussion?start=%d' % start
-            # print 'Scraping posts from froup: %s' % url
-            page_html = urllib2.urlopen(url)
-            soup = BeautifulSoup(page_html, 'html.parser')
-            title_tag_list = soup.findAll('td', attrs={'class': 'title'})
-            for title_tag in title_tag_list:
-                user_name_tag = title_tag.find_next_sibling("td")
-                extracted_user_id = user_name_tag.a.get(
-                    'href').split('/people/')[-1][:-1]
-                # print extracted_user_id
-                if extracted_user_id == user_id:
-                    all_posts.append(title_tag.a.get('href'))
-            start += count
-            sleep(0.5)
+            print 'Scraping posts from froup: %s' % url
+            try:
+                page_html = urllib2.urlopen(url)
+                soup = BeautifulSoup(page_html, 'html.parser')
+                title_tag_list = soup.findAll('td', attrs={'class': 'title'})
+                for title_tag in title_tag_list:
+                    user_name_tag = title_tag.find_next_sibling("td")
+                    extracted_user_id = user_name_tag.a.get(
+                        'href').split('/people/')[-1][:-1]
+                    # print extracted_user_id
+                    if extracted_user_id == user_id:
+                        all_posts.append(title_tag.a.get('href'))
+                start += count
+                sleep(0.5)
+            except:
+                print 'Exception occur, skip to next page'
+                continue
     for post_url in all_posts:
         print 'Post url: %s' % post_url
     return all_posts
